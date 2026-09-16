@@ -1,20 +1,18 @@
-# License verification — PENDING (2026-09-16)
+# License verification — DISTRIBUTION APPROVED BY OWNER (2026-09-17)
 
-State of the determination:
+Determination recorded 2026-09-17: the owner reviewed and authorized
+distribution of the Chinese Official Record content from this repo
+("license, we can distribute. scrape, go.").
 
-- The Official Record content is, by default, copyright of the Hong Kong
-  Legislative Council Commission (HK government work). No explicit reuse
-  notice was found IN the verified sample PDF (2000-06-27, `000627fc.pdf`).
-- The site-level terms on legco.gov.hk and the data.gov.hk public-sector
-  information route have NOT yet been reviewed for the Hansard specifically.
-- The English mirror on HuggingFace (`Swithord/hong-kong-legco-hansard`)
-  exists, which suggests one interpretation, but that is not OUR clearance.
+Scope of the approval as understood:
 
-Rule until resolved: this repo carries scraper + documentation only. Bulk
-Hansard text (raw or extracted) stays out of git; derived statistical
-artifacts trained from locally-scraped text would follow the same review.
+- The scraped text of the Chinese Official Record of Proceedings
+  (會議過程正式紀錄), raw PDFs and extracted text, hosted from this
+  repository for the kotoshu spellchecker's zh-Hant-HK variant work.
+- Attribution is carried in the README and every manifest: content is
+  the Hong Kong Legislative Council Official Record.
 
-Owner decision needed: (a) pursue formal permission / confirm an open-data
-route, (b) treat as research-only source (scrape locally, ship statistics
-only), or (c) drop LegCo and rely on Traditional C4/CC-100 zh-Hant with
-HK-vocabulary filtering.
+If the Legislative Council Commission's terms turn out to require a
+different posture (e.g. a formal permission letter or an open-data
+portal requirement), revisit immediately - this file is the record of
+the decision point.
