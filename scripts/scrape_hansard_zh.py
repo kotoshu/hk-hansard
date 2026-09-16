@@ -29,16 +29,33 @@ REPO = Path(__file__).resolve().parents[1]
 DATA = REPO / "data"
 BASE = "https://www.legco.gov.hk"
 
-# Verified era meetings (Swithord's English table, converted to the Chinese
-# part suffix). Extend per docs/URL-PATTERNS.md as eras verify.
-VERIFIED: dict[str, list[tuple[str, str]]] = {
-    "yr99-00": [
-        ("2000-06-27", "yr99-00/chinese/counmtg/hansard/000627fc.pdf"),
-        ("2000-05-24", "yr99-00/chinese/counmtg/hansard/000524fc.pdf"),
-    ],
-    "yr98-99": [
-        ("1999-12-02", "yr98-99/chinese/counmtg/hansard/991202fc.pdf"),
-    ],
+# VERIFIED era classes (docs/URL-PATTERNS.md). A (legco_year, date) maps to
+# the Chinese document path; only era classes with a live-verified Chinese
+# URL are generated - the 1990s multi-part formats stay out until verified.
+from datetime import timedelta
+
+def _era_path(legco_year: str, date) -> str:
+    d2 = date.strftime("%y%m%d"); d4 = date.strftime("%Y%m%d"); md = date.strftime("%m%d")
+    if date < datetime(2001, 10, 17):
+        return f"{legco_year}/chinese/counmtg/hansard/{d2}fc.pdf"
+    if date < datetime(2006, 1, 1):
+        return f"{legco_year}/chinese/counmtg/hansard/cm{md}ti-translate-c.pdf"
+    if date < datetime(2014, 1, 1):
+        return f"{legco_year}/chinese/counmtg/hansard/cm{md}-translate-c.pdf"
+    return f"{legco_year}/chinese/counmtg/hansard/cm{d4}-translate-c.pdf"
+
+def _legco_year(date) -> str:
+    y1 = date.year if date.month >= 7 or date.year >= 2022 else date.year - 1
+    if y1 >= 2022:
+        return f"yr{y1}"
+    return f"yr{str(y1)[-2:]}-{str(y1 + 1)[-2:]}"
+
+VERIFIED_SAMPLES = {
+    "2000-06-27": "yr99-00/chinese/counmtg/hansard/000627fc.pdf",
+    "2002-01-09": "yr01-02/chinese/counmtg/hansard/cm0109ti-translate-c.pdf",
+    "2007-01-10": "yr06-07/chinese/counmtg/hansard/cm0110-translate-c.pdf",
+    "2015-01-07": "yr14-15/chinese/counmtg/hansard/cm20150107-translate-c.pdf",
+    "2022-06-15": "yr2022/chinese/counmtg/hansard/cm20220615-translate-c.pdf",
 }
 
 CJK = "㐀-鿿"
@@ -98,17 +115,27 @@ def extract(pdf: Path, out_txt: Path) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--sample", action="store_true")
-    parser.add_argument("--era", choices=sorted(VERIFIED), default=None)
+    parser.add_argument("--sample", action="store_true", help="all five verified era samples")
+    parser.add_argument("--date", default=None, help="YYYY-MM-DD meeting date (verified eras)")
+    parser.add_argument("--from", dest="start_date", default=None, help="YYYY-MM-DD bulk range start")
+    parser.add_argument("--to", dest="end_date", default=None, help="YYYY-MM-DD bulk range end")
     args = parser.parse_args()
 
     targets: list[tuple[str, str]] = []
     if args.sample:
-        targets = [VERIFIED["yr99-00"][0]]
-    elif args.era:
-        targets = VERIFIED[args.era]
+        targets = sorted(VERIFIED_SAMPLES.items())
+    elif args.date:
+        d = datetime.strptime(args.date, "%Y-%m-%d")
+        targets = [(args.date, _era_path(_legco_year(d), d))]
+    elif args.start_date and args.end_date:
+        d = datetime.strptime(args.start_date, "%Y-%m-%d")
+        end = datetime.strptime(args.end_date, "%Y-%m-%d")
+        while d <= end:
+            if d.weekday() < 5:
+                targets.append((d.strftime("%Y-%m-%d"), _era_path(_legco_year(d), d)))
+            d += timedelta(days=1)
     else:
-        parser.error("choose --sample or --era {%(choices)s}" % {"choices": ",".join(VERIFIED)})
+        parser.error("choose --sample, --date, or --from/--to")
 
     raw = DATA / "raw"; txt = DATA / "text"
     raw.mkdir(parents=True, exist_ok=True); txt.mkdir(parents=True, exist_ok=True)
