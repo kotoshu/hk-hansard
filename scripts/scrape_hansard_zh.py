@@ -99,14 +99,20 @@ def fetch(url: str, dest: Path, rate_limit_s: float = 2.0) -> bool:
         with urllib.request.urlopen(req, timeout=120, context=ctx) as resp, dest.open("wb") as fh:
             while chunk := resp.read(1 << 20):
                 fh.write(chunk)
+    except urllib.error.HTTPError as exc:
+        time.sleep(0.5)  # most weekdays have no meeting; be polite on 404s too
+        return False
     except Exception as exc:
         print(f"  FAIL {url}: {exc}")
+        time.sleep(rate_limit_s)
         return False
     time.sleep(rate_limit_s)
     return True
 
 
 def extract(pdf: Path, out_txt: Path) -> int:
+    if out_txt.exists():  # resume: extraction is the expensive half
+        return out_txt.stat().st_size
     from pdfminer.high_level import extract_text
     text = cleanup_text(extract_text(str(pdf)))
     out_txt.write_text(text, encoding="utf-8")

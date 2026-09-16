@@ -23,9 +23,10 @@ this repo is the Chinese counterpart.
 - Sample verified: `000627fc.pdf` (2000-06-27 meeting) — formal Traditional
   Chinese, HK parliamentary register, ~1.9 MB; extraction quirks documented
   in the scraper.
-- **Content license: PENDING** (`LICENSE-VERIFICATION.md`). This repo hosts
-  the scraper, the URL archaeology, and packaging tooling. No bulk Hansard
-  text is committed until the license determination clears (owner call).
+- **Content license: DISTRIBUTION APPROVED by owner 2026-09-17**
+  (`LICENSE-VERIFICATION.md`). Bulk scrape authorized; extracted text
+  ships from this repo with attribution to the Hong Kong Legislative
+  Council Official Record.
 
 ## Layout
 
