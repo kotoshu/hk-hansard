@@ -99,6 +99,10 @@ def fetch(url: str, dest: Path, rate_limit_s: float = 2.0) -> bool:
         with urllib.request.urlopen(req, timeout=120, context=ctx) as resp, dest.open("wb") as fh:
             while chunk := resp.read(1 << 20):
                 fh.write(chunk)
+        if dest.read_bytes()[:4] != b"%PDF":
+            dest.unlink()  # an HTML error page saved as .pdf, etc.
+            time.sleep(0.5)
+            return False
     except urllib.error.HTTPError as exc:
         time.sleep(0.5)  # most weekdays have no meeting; be polite on 404s too
         return False
@@ -110,11 +114,23 @@ def fetch(url: str, dest: Path, rate_limit_s: float = 2.0) -> bool:
     return True
 
 
+FAILED = Path("data/failed.txt")
+
+
 def extract(pdf: Path, out_txt: Path) -> int:
+    """Extract one PDF; a corrupt file is quarantined to data/failed.txt
+    and NEVER kills the run (the 2026-09-17 crash: a magic-valid PDF
+    with no /Root took down 7 hours of scraping)."""
     if out_txt.exists():  # resume: extraction is the expensive half
         return out_txt.stat().st_size
     from pdfminer.high_level import extract_text
-    text = cleanup_text(extract_text(str(pdf)))
+    try:
+        text = cleanup_text(extract_text(str(pdf)))
+    except Exception as exc:
+        with FAILED.open("a") as fh:
+            fh.write(f"{pdf.name}\t{type(exc).__name__}: {str(exc)[:120]}\n")
+        pdf.rename(pdf.with_suffix(".bad"))  # do not re-attempt on resume
+        return 0
     out_txt.write_text(text, encoding="utf-8")
     return len(text)
 
