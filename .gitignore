@@ -1,5 +1,8 @@
-data/
+data/raw/
 *.pdf
 *.doc
 *.htm
 __pycache__/
+!data/text/
+!data/manifest.json
+!data/failed.txt

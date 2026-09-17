@@ -15,18 +15,21 @@ Hansard is large, authoritative, and scrapable — the English twin is already
 mirrored at `Swithord/hong-kong-legco-transcript` (813k speeches, 1985-2025);
 this repo is the Chinese counterpart.
 
-## Status
+## Status: THE CORPUS IS IN (2026-09-17)
 
-- URL pattern for the Chinese records VERIFIED for the yr98-99/yr99-00 era
-  (same stem as the English files, `/english/` → `/chinese/`, final part
-  letter → `c`). Per-era table: `docs/URL-PATTERNS.md`.
-- Sample verified: `000627fc.pdf` (2000-06-27 meeting) — formal Traditional
-  Chinese, HK parliamentary register, ~1.9 MB; extraction quirks documented
-  in the scraper.
+**1,343 meetings scraped and extracted — June 1999 through July 2026,
+~503 million characters of formal Traditional Chinese** (the LegCo
+Official Record), distributed in this repo as
+`data/text/{legco-year}-{stem}.txt` with the full provenance manifest
+(`data/manifest.json`: per-meeting date, source URL, PDF sha256, byte
+and character counts). Known gaps: 3 meetings scraped but not yet
+manifest-reconciled; 1 corrupt PDF quarantined (`data/failed.txt`).
+
+- URL archaeology for every verified era: `docs/URL-PATTERNS.md`.
+- Scraper (rate-limited, resumable, checksummed): `scripts/`.
 - **Content license: DISTRIBUTION APPROVED by owner 2026-09-17**
-  (`LICENSE-VERIFICATION.md`). Bulk scrape authorized; extracted text
-  ships from this repo with attribution to the Hong Kong Legislative
-  Council Official Record.
+  (`LICENSE-VERIFICATION.md`), with attribution to the Hong Kong
+  Legislative Council Official Record on every derived use.
 
 ## Layout
 
