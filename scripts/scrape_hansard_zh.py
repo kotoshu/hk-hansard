@@ -165,15 +165,17 @@ def main() -> int:
     manifest = []
     for date, path in targets:
         url = f"{BASE}/{path}"
-        pdf = raw / Path(path).name
+        # year-prefixed names: era stems like cm{mmdd} COLLIDE across years
+        pdf = raw / f"{path.split('/')[0]}-{Path(path).name}"
         print(f"[{date}] {url}")
         if not fetch(url, pdf):
             continue
         n_chars = extract(pdf, txt / (pdf.stem + ".txt"))
-        manifest.append({
-            "date": date, "url": url, "sha256": sha256_of(pdf),
-            "bytes": pdf.stat().st_size, "text_chars": n_chars,
-        })
+        if pdf.exists():  # extract() may have quarantined a corrupt file
+            manifest.append({
+                "date": date, "url": url, "sha256": sha256_of(pdf),
+                "bytes": pdf.stat().st_size, "text_chars": n_chars,
+            })
     (DATA / "manifest.json").write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "records": manifest,
